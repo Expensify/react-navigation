@@ -35,10 +35,12 @@ export type NativeStackNavigationEventMap = {
 
 export type NativeStackNavigationProp<
   ParamList extends ParamListBase,
-  RouteName extends keyof ParamList = string
+  RouteName extends keyof ParamList = string,
+  NavigatorID extends string | undefined = undefined
 > = NavigationProp<
   ParamList,
   RouteName,
+  NavigatorID,
   StackNavigationState<ParamList>,
   NativeStackNavigationOptions,
   NativeStackNavigationEventMap
@@ -47,9 +49,10 @@ export type NativeStackNavigationProp<
 
 export type NativeStackScreenProps<
   ParamList extends ParamListBase,
-  RouteName extends keyof ParamList = string
+  RouteName extends keyof ParamList = string,
+  NavigatorID extends string | undefined = undefined
 > = {
-  navigation: NativeStackNavigationProp<ParamList, RouteName>;
+  navigation: NativeStackNavigationProp<ParamList, RouteName, NavigatorID>;
   route: RouteProp<ParamList, RouteName>;
 };
 
@@ -322,6 +325,24 @@ export type NativeStackNavigationOptions = {
    */
   headerBackButtonMenuEnabled?: boolean;
   /**
+   * Whether the home indicator should prefer to stay hidden on this screen. Defaults to `false`.
+   *
+   * @platform ios
+   */
+  autoHideHomeIndicator?: boolean;
+  /**
+   * Sets the navigation bar color. Defaults to initial navigation bar color.
+   *
+   * @platform android
+   */
+  navigationBarColor?: string;
+  /**
+   * Sets the visibility of the navigation bar. Defaults to `false`.
+   *
+   * @platform android
+   */
+  navigationBarHidden?: boolean;
+  /**
    * Sets the status bar animation (similar to the `StatusBar` component).
    * Requires setting `View controller-based status bar appearance -> YES` (or removing the config) in your `Info.plist` file.
    *
@@ -330,6 +351,12 @@ export type NativeStackNavigationOptions = {
    * @platform ios
    */
   statusBarAnimation?: ScreenProps['statusBarAnimation'];
+  /**
+   * Sets the status bar color (similar to the `StatusBar` component). Defaults to initial status bar color.
+   *
+   * @platform android
+   */
+  statusBarColor?: string;
   /**
    * Whether the status bar should be hidden on this screen.
    * Requires setting `View controller-based status bar appearance -> YES` in your Info.plist file.
@@ -349,9 +376,44 @@ export type NativeStackNavigationOptions = {
    */
   statusBarStyle?: ScreenProps['statusBarStyle'];
   /**
+   * Sets the translucency of the status bar. Defaults to `false`.
+   *
+   * @platform android
+   */
+  statusBarTranslucent?: boolean;
+  /**
+   * Sets the direction in which you should swipe to dismiss the screen.
+   * When using `vertical` option, options `fullScreenGestureEnabled: true`, `customAnimationOnGesture: true` and `animation: 'slide_from_bottom'` are set by default.
+   *
+   * Supported values:
+   * - `vertical` – dismiss screen vertically
+   * - `horizontal` – dismiss screen horizontally (default)
+   *
+   * @platform ios
+   */
+  gestureDirection?: ScreenProps['swipeDirection'];
+  /**
    * Style object for the scene content.
    */
   contentStyle?: StyleProp<ViewStyle>;
+  /**
+   * Whether the gesture to dismiss should use animation provided to `animation` prop. Defaults to `false`.
+   *
+   * Doesn't affect the behavior of screens presented modally.
+   *
+   * @platform ios
+   */
+  customAnimationOnGesture?: boolean;
+  /**
+   * Whether the gesture to dismiss should work on the whole screen. Using gesture to dismiss with this option results in the same
+   * transition animation as `simple_push`. This behavior can be changed by setting `customAnimationOnGesture` prop. Achieving the
+   * default iOS animation isn't possible due to platform limitations. Defaults to `false`.
+   *
+   * Doesn't affect the behavior of screens presented modally.
+   *
+   * @platform ios
+   */
+  fullScreenGestureEnabled?: boolean;
   /**
    * Whether you can use gestures to dismiss this screen. Defaults to `true`.
    *
@@ -376,7 +438,9 @@ export type NativeStackNavigationOptions = {
    * Supported values:
    * - "default": use the platform default animation
    * - "fade": fade screen in or out
-   * - "flip": flip the screen, requires stackPresentation: "modal" (iOS only)
+   * - "flip": flip the screen, requires presentation: "modal" (iOS only)
+   * - "simple_push": use the platform default animation, but without shadow and native header transition (iOS only)
+   * - "slide_from_bottom": slide in the new screen from bottom
    * - "slide_from_right": slide in the new screen from right (Android only, uses default animation on iOS)
    * - "slide_from_left": slide in the new screen from left (Android only, uses default animation on iOS)
    * - "none": don't animate the screen
@@ -384,6 +448,13 @@ export type NativeStackNavigationOptions = {
    * Only supported on iOS and Android.
    */
   animation?: ScreenProps['stackAnimation'];
+  /**
+   * Changes the duration (in milliseconds) of `slide_from_bottom`, `fade_from_bottom`, `fade` and `simple_push` transitions on iOS. Defaults to `350`.
+   * The duration of `default` and `flip` transitions isn't customizable.
+   *
+   * @platform ios
+   */
+  animationDuration?: number;
   /**
    * How should the screen be presented.
    *
@@ -415,6 +486,14 @@ export type NativeStackNavigationOptions = {
    * Only supported on iOS and Android.
    */
   orientation?: ScreenProps['screenOrientation'];
+  /**
+   * Whether inactive screens should be suspended from re-rendering. Defaults to `false`.
+   * Defaults to `true` when `enableFreeze()` is run at the top of the application.
+   * Requires `react-native-screens` version >=3.16.0.
+   *
+   * Only supported on iOS and Android.
+   */
+  freezeOnBlur?: boolean;
 };
 
 export type NativeStackNavigatorProps = DefaultNavigatorOptions<

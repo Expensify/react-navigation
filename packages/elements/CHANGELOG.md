@@ -3,6 +3,66 @@
 All notable changes to this project will be documented in this file.
 See [Conventional Commits](https://conventionalcommits.org) for commit guidelines.
 
+## [1.3.6](https://github.com/react-navigation/react-navigation/compare/@react-navigation/elements@1.3.4...@react-navigation/elements@1.3.6) (2022-09-16)
+
+
+### Bug Fixes
+
+* replace deprecated I18nManager.isRTL with 18nManager.getConstants().isRTL ([#10547](https://github.com/react-navigation/react-navigation/issues/10547)) ([50b88d4](https://github.com/react-navigation/react-navigation/commit/50b88d40496a04f613073c63119b21a104ec9bc2))
+
+
+
+
+
+## [1.3.5](https://github.com/react-navigation/react-navigation/compare/@react-navigation/elements@1.3.4...@react-navigation/elements@1.3.5) (2022-08-24)
+
+
+### Bug Fixes
+
+* replace deprecated I18nManager.isRTL with 18nManager.getConstants().isRTL ([#10547](https://github.com/react-navigation/react-navigation/issues/10547)) ([50b88d4](https://github.com/react-navigation/react-navigation/commit/50b88d40496a04f613073c63119b21a104ec9bc2))
+
+
+
+
+
+## [1.3.4](https://github.com/react-navigation/react-navigation/compare/@react-navigation/elements@1.3.3...@react-navigation/elements@1.3.4) (2022-07-05)
+
+
+### Bug Fixes
+
+* ensure same @types/react version in repo ([#10663](https://github.com/react-navigation/react-navigation/issues/10663)) ([e662465](https://github.com/react-navigation/react-navigation/commit/e6624653fbbd931158dbebd17142abf9637205b6)), closes [#10655](https://github.com/react-navigation/react-navigation/issues/10655)
+
+
+
+
+
+## [1.3.3](https://github.com/react-navigation/react-navigation/compare/@react-navigation/elements@1.3.2...@react-navigation/elements@1.3.3) (2022-04-01)
+
+**Note:** Version bump only for package @react-navigation/elements
+
+
+
+
+
+## [1.3.2](https://github.com/react-navigation/react-navigation/compare/@react-navigation/elements@1.3.1...@react-navigation/elements@1.3.2) (2022-04-01)
+
+
+### Bug Fixes
+
+* fix type errors when passing animated styles to header ([9058b1c](https://github.com/react-navigation/react-navigation/commit/9058b1c22f4fc1358c72d67150a0e3f37ff802e7))
+
+
+
+
+
+## [1.3.1](https://github.com/react-navigation/react-navigation/compare/@react-navigation/elements@1.3.0...@react-navigation/elements@1.3.1) (2022-02-02)
+
+**Note:** Version bump only for package @react-navigation/elements
+
+
+
+
+
 # [1.3.0](https://github.com/react-navigation/react-navigation/compare/@react-navigation/elements@1.2.1...@react-navigation/elements@1.3.0) (2022-01-29)
 
 

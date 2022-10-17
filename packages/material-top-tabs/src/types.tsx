@@ -43,10 +43,12 @@ export type MaterialTopTabNavigationHelpers = NavigationHelpers<
 
 export type MaterialTopTabNavigationProp<
   ParamList extends ParamListBase,
-  RouteName extends keyof ParamList = keyof ParamList
+  RouteName extends keyof ParamList = keyof ParamList,
+  NavigatorID extends string | undefined = undefined
 > = NavigationProp<
   ParamList,
   RouteName,
+  NavigatorID,
   TabNavigationState<ParamList>,
   MaterialTopTabNavigationOptions,
   MaterialTopTabNavigationEventMap
@@ -55,9 +57,10 @@ export type MaterialTopTabNavigationProp<
 
 export type MaterialTopTabScreenProps<
   ParamList extends ParamListBase,
-  RouteName extends keyof ParamList = keyof ParamList
+  RouteName extends keyof ParamList = keyof ParamList,
+  NavigatorID extends string | undefined = undefined
 > = {
-  navigation: MaterialTopTabNavigationProp<ParamList, RouteName>;
+  navigation: MaterialTopTabNavigationProp<ParamList, RouteName, NavigatorID>;
   route: RouteProp<ParamList, RouteName>;
 };
 
@@ -113,7 +116,9 @@ export type MaterialTopTabNavigationOptions = {
    */
   tabBarIndicator?: (
     props: Omit<
-      Parameters<React.ComponentProps<typeof TabBar>['renderIndicator']>[0],
+      Parameters<
+        NonNullable<React.ComponentProps<typeof TabBar>['renderIndicator']>
+      >[0],
       'navigationState'
     > & { state: TabNavigationState<ParamListBase> }
   ) => React.ReactNode;
@@ -198,6 +203,12 @@ export type MaterialTopTabNavigationOptions = {
   swipeEnabled?: boolean;
 
   /**
+   * Whether to enable animations when switching between tabs by pressing on the tab bar or programmatically.
+   * Switching tab via swipe gesture will still result in an animation.
+   */
+  animationEnabled?: boolean;
+
+  /**
    * Whether this screen should be lazily rendered. When this is set to `true`,
    * the screen will be rendered as it comes into the viewport.
    * By default all screens are rendered to provide a smoother swipe experience.
@@ -248,6 +259,7 @@ export type MaterialTopTabNavigationConfig = Omit<
   | 'renderTabBar'
   | 'renderLazyPlaceholder'
   | 'swipeEnabled'
+  | 'animationEnabled'
   | 'lazy'
   | 'lazyPreloadDistance'
   | 'lazyPlaceholder'

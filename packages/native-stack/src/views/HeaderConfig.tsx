@@ -1,4 +1,4 @@
-import { HeaderTitle } from '@react-navigation/elements';
+import { getHeaderTitle, HeaderTitle } from '@react-navigation/elements';
 import { Route, useTheme } from '@react-navigation/native';
 import * as React from 'react';
 import {
@@ -8,7 +8,6 @@ import {
   TextStyle,
   View,
 } from 'react-native';
-import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import {
   isSearchBarAvailableForCurrentPlatform,
   ScreenStackHeaderBackButtonImage,
@@ -24,6 +23,7 @@ import type { NativeStackNavigationOptions } from '../types';
 import { processFonts } from './FontProcessor';
 
 type Props = NativeStackNavigationOptions & {
+  headerTopInsetEnabled: boolean;
   headerHeight: number;
   route: Route<string>;
   canGoBack: boolean;
@@ -54,12 +54,11 @@ export default function HeaderConfig({
   headerTitleStyle,
   headerTransparent,
   headerSearchBarOptions,
+  headerTopInsetEnabled,
   route,
   title,
   canGoBack,
 }: Props): JSX.Element {
-  const insets = useSafeAreaInsets();
-
   const { colors } = useTheme();
   const tintColor =
     headerTintColor ?? (Platform.OS === 'ios' ? colors.primary : colors.text);
@@ -79,7 +78,7 @@ export default function HeaderConfig({
       headerTitleStyleFlattened.fontFamily,
     ]);
 
-  const titleText = title !== undefined ? title : route.name;
+  const titleText = getHeaderTitle({ title, headerTitle }, route.name);
   const titleColor =
     headerTitleStyleFlattened.color ?? headerTintColor ?? colors.text;
   const titleFontSize = headerTitleStyleFlattened.fontSize;
@@ -110,7 +109,10 @@ export default function HeaderConfig({
   });
   const headerTitleElement =
     typeof headerTitle === 'function'
-      ? headerTitle({ tintColor, children: titleText })
+      ? headerTitle({
+          tintColor,
+          children: titleText,
+        })
       : null;
 
   const supportsHeaderSearchBar =
@@ -136,6 +138,14 @@ export default function HeaderConfig({
   const backButtonInCustomView = headerBackVisible
     ? headerLeftElement != null
     : Platform.OS === 'android' && headerTitleElement != null;
+
+  const translucent =
+    headerBackground != null ||
+    headerTransparent ||
+    // When using a SearchBar or large title, the header needs to be translucent for it to work on iOS
+    ((hasHeaderSearchBar || headerLargeTitle) &&
+      Platform.OS === 'ios' &&
+      headerTransparent !== false);
 
   return (
     <>
@@ -163,7 +173,7 @@ export default function HeaderConfig({
         backTitleFontSize={headerBackTitleStyleFlattened.fontSize}
         blurEffect={headerBlurEffect}
         color={tintColor}
-        direction={I18nManager.isRTL ? 'rtl' : 'ltr'}
+        direction={I18nManager.getConstants().isRTL ? 'rtl' : 'ltr'}
         disableBackButtonMenu={headerBackButtonMenuEnabled === false}
         hidden={headerShown === false}
         hideBackButton={headerBackVisible === false}
@@ -179,20 +189,15 @@ export default function HeaderConfig({
         largeTitleFontSize={headerLargeTitleStyleFlattened.fontSize}
         largeTitleFontWeight={headerLargeTitleStyleFlattened.fontWeight}
         largeTitleHideShadow={headerLargeTitleShadowVisible === false}
-        title={typeof headerTitle === 'string' ? headerTitle : titleText}
+        title={titleText}
         titleColor={titleColor}
         titleFontFamily={titleFontFamily}
         titleFontSize={titleFontSize}
         titleFontWeight={titleFontWeight}
-        topInsetEnabled={insets.top !== 0}
+        topInsetEnabled={headerTopInsetEnabled}
         translucent={
-          headerBackground != null ||
           // This defaults to `true`, so we can't pass `undefined`
-          headerTransparent === true ||
-          // When using a SearchBar or large title, the header needs to be translucent for it to work on iOS
-          ((hasHeaderSearchBar || headerLargeTitle) &&
-            Platform.OS === 'ios' &&
-            headerTransparent !== false)
+          translucent === true
         }
       >
         {Platform.OS === 'ios' ? (

@@ -81,7 +81,7 @@ type State = {
   headerHeights: Record<string, number>;
 };
 
-const EPSILON = 0.01;
+const EPSILON = 1e-5;
 
 const STATE_INACTIVE = 0;
 const STATE_TRANSITIONING_OR_BELOW_TOP = 1;
@@ -142,7 +142,7 @@ const getHeaderHeights = (
     const style = StyleSheet.flatten(headerStyle || {});
 
     const height =
-      typeof style.height === 'number'
+      'height' in style && typeof style.height === 'number'
         ? style.height
         : previous[curr.route.key];
 
@@ -604,6 +604,7 @@ export default class CardStack extends React.Component<Props, State> {
               headerTransparent,
               headerStyle,
               headerTintColor,
+              freezeOnBlur,
             } = scene.descriptor.options;
 
             const safeAreaInsetTop = insets.top;
@@ -614,16 +615,23 @@ export default class CardStack extends React.Component<Props, State> {
             const headerHeight =
               headerShown !== false ? headerHeights[route.key] : 0;
 
-            const { backgroundColor: headerBackgroundColor } =
-              StyleSheet.flatten(headerStyle) || {};
-
             let headerDarkContent: boolean | undefined;
 
             if (headerShown) {
               if (typeof headerTintColor === 'string') {
                 headerDarkContent = Color(headerTintColor).isDark();
-              } else if (typeof headerBackgroundColor === 'string') {
-                headerDarkContent = !Color(headerBackgroundColor).isDark();
+              } else {
+                const flattenedHeaderStyle = StyleSheet.flatten(headerStyle);
+
+                if (
+                  flattenedHeaderStyle &&
+                  'backgroundColor' in flattenedHeaderStyle &&
+                  typeof flattenedHeaderStyle.backgroundColor === 'string'
+                ) {
+                  headerDarkContent = !Color(
+                    flattenedHeaderStyle.backgroundColor
+                  ).isDark();
+                }
               }
             }
 
@@ -649,6 +657,7 @@ export default class CardStack extends React.Component<Props, State> {
                 style={StyleSheet.absoluteFill}
                 enabled={detachInactiveScreens}
                 active={isScreenActive}
+                freezeOnBlur={freezeOnBlur}
                 pointerEvents="box-none"
               >
                 <CardContainer

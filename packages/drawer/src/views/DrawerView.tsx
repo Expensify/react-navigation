@@ -19,7 +19,7 @@ import {
   StyleSheet,
   View,
 } from 'react-native';
-import Animated from 'react-native-reanimated';
+import * as Reanimated from 'react-native-reanimated';
 import { useSafeAreaFrame } from 'react-native-safe-area-context';
 
 import type {
@@ -80,13 +80,20 @@ function DrawerViewBase({
   detachInactiveScreens = Platform.OS === 'web' ||
     Platform.OS === 'android' ||
     Platform.OS === 'ios',
-  // Running in chrome debugger
-  // @ts-expect-error
-  useLegacyImplementation = !global.nativeCallSyncHook ||
-    // Reanimated 2 is not configured
-    // @ts-expect-error: the type definitions are incomplete
-    !Animated.isConfigured?.(),
+  // Reanimated 2 is not configured
+  // @ts-expect-error: the type definitions are incomplete
+  useLegacyImplementation = !Reanimated.isConfigured?.(),
 }: Props) {
+  // Reanimated v3 dropped legacy v1 syntax
+  const legacyImplemenationNotAvailable =
+    require('react-native-reanimated').abs === undefined;
+
+  if (useLegacyImplementation && legacyImplemenationNotAvailable) {
+    throw new Error(
+      'The `useLegacyImplementation` prop is not available with Reanimated 3 as it no longer includes support for Reanimated 1 legacy API. Remove the `useLegacyImplementation` prop from `Drawer.Navigator` to be able to use it.'
+    );
+  }
+
   const Drawer: React.ComponentType<DrawerProps> = useLegacyImplementation
     ? require('./legacy/Drawer').default
     : require('./modern/Drawer').default;
@@ -94,7 +101,7 @@ function DrawerViewBase({
   const focusedRouteKey = state.routes[state.index].key;
   const {
     drawerHideStatusBarOnOpen = false,
-    drawerPosition = I18nManager.isRTL ? 'right' : 'left',
+    drawerPosition = I18nManager.getConstants().isRTL ? 'right' : 'left',
     drawerStatusBarAnimation = 'slide',
     drawerStyle,
     drawerType = Platform.select({ ios: 'slide', default: 'front' }),
@@ -223,6 +230,7 @@ function DrawerViewBase({
           }
 
           const {
+            freezeOnBlur,
             header = ({ layout, options }: DrawerHeaderProps) => (
               <Header
                 {...options}
@@ -234,6 +242,9 @@ function DrawerViewBase({
                 }
               />
             ),
+            headerShown,
+            headerStatusBarHeight,
+            headerTransparent,
             sceneContainerStyle,
           } = descriptor.options;
 
@@ -243,14 +254,15 @@ function DrawerViewBase({
               style={[StyleSheet.absoluteFill, { zIndex: isFocused ? 0 : -1 }]}
               visible={isFocused}
               enabled={detachInactiveScreens}
+              freezeOnBlur={freezeOnBlur}
             >
               <Screen
                 focused={isFocused}
                 route={descriptor.route}
                 navigation={descriptor.navigation}
-                headerShown={descriptor.options.headerShown}
-                headerTransparent={descriptor.options.headerTransparent}
-                headerStatusBarHeight={descriptor.options.headerStatusBarHeight}
+                headerShown={headerShown}
+                headerStatusBarHeight={headerStatusBarHeight}
+                headerTransparent={headerTransparent}
                 header={header({
                   layout: dimensions,
                   route: descriptor.route,

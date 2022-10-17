@@ -9,14 +9,13 @@ import {
   View,
 } from 'react-native';
 import {
-  PanGestureHandler,
-  PanGestureHandlerGestureEvent,
+  Gesture,
+  GestureDetector,
   State as GestureState,
 } from 'react-native-gesture-handler';
 import Animated, {
   interpolate,
   runOnJS,
-  useAnimatedGestureHandler,
   useAnimatedStyle,
   useDerivedValue,
   useSharedValue,
@@ -176,23 +175,24 @@ export default function Drawer({
 
   React.useEffect(() => toggleDrawer(open), [open, toggleDrawer]);
 
-  const onGestureEvent = useAnimatedGestureHandler<
-    PanGestureHandlerGestureEvent,
-    { startX: number }
-  >({
-    onStart: (event, ctx) => {
-      ctx.startX = translationX.value;
+  const startX = useSharedValue(0);
+  let panGesture = Gesture.Pan()
+    .activeOffsetX([-SWIPE_DISTANCE_MINIMUM, SWIPE_DISTANCE_MINIMUM])
+    .hitSlop(hitSlop)
+    .enabled(drawerType !== 'permanent' && swipeEnabled)
+    .onStart((event) => {
+      startX.value = translationX.value;
       gestureState.value = event.state;
       touchStartX.value = event.x;
 
       runOnJS(onGestureStart)();
-    },
-    onActive: (event, ctx) => {
+    })
+    .onUpdate((event) => {
       touchX.value = event.x;
-      translationX.value = ctx.startX + event.translationX;
+      translationX.value = startX.value + event.translationX;
       gestureState.value = event.state;
-    },
-    onEnd: (event) => {
+    })
+    .onEnd((event) => {
       gestureState.value = event.state;
 
       const nextOpen =
@@ -207,11 +207,15 @@ export default function Drawer({
           : open;
 
       toggleDrawer(nextOpen, event.velocityX);
-    },
-    onFinish: () => {
+    })
+    .onFinalize(() => {
       runOnJS(onGestureFinish)();
-    },
-  });
+    });
+  // @ts-expect-error Ref types incompatible yet, needs to get fixed upstream
+  panGesture.config = {
+    ...panGesture.config,
+    ...gestureHandlerProps,
+  };
 
   const translateX = useDerivedValue(() => {
     // Comment stolen from react-native-gesture-handler/DrawerLayout
@@ -317,14 +321,7 @@ export default function Drawer({
 
   return (
     <DrawerProgressContext.Provider value={progress}>
-      <PanGestureHandler
-        activeOffsetX={[-SWIPE_DISTANCE_MINIMUM, SWIPE_DISTANCE_MINIMUM]}
-        failOffsetY={[-SWIPE_DISTANCE_MINIMUM, SWIPE_DISTANCE_MINIMUM]}
-        hitSlop={hitSlop}
-        enabled={drawerType !== 'permanent' && swipeEnabled}
-        onGestureEvent={onGestureEvent}
-        {...gestureHandlerProps}
-      >
+      <GestureDetector gesture={panGesture}>
         {/* Immediate child of gesture handler needs to be an Animated.View */}
         <Animated.View
           style={[
@@ -371,7 +368,7 @@ export default function Drawer({
             {renderDrawerContent()}
           </Animated.View>
         </Animated.View>
-      </PanGestureHandler>
+      </GestureDetector>
     </DrawerProgressContext.Provider>
   );
 }

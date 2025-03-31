@@ -8,22 +8,26 @@ jobs:
     if: github.event.pull_request.head.repo.owner.login == 'react-navigation'
     steps:
       - name: Checkout
-        uses: actions/checkout@v2
+        # v2
+        uses: actions/checkout@ee0669bd1cc54295c223e0bb666b733df41de1c5
 
       - name: Setup Node.js
-        uses: actions/setup-node@v3
+        # v3
+        uses: actions/setup-node@1a4442cacd436585916779262731d5b162bc6ec7
         with:
           node-version: 16.x
           cache: 'yarn'
 
       - name: Setup Expo
-        uses: expo/expo-github-action@v6
+        # v6
+        uses: expo/expo-github-action@c3c02de017ef8cf6152daee160e8a47a2340a5e5
         with:
           token: ${{ secrets.EXPO_TOKEN }}
 
       - name: Restore yarn cache
         id: yarn-cache
-        uses: actions/cache@v3
+        # v3
+        uses: actions/cache@2f8e54208210a422b2efd51efaa6bd6d7ca8920f
         with:
           path: |
             '**/node_modules'
@@ -45,7 +49,8 @@ jobs:
         run: echo "::set-output name=path::@react-navigation/react-navigation-example?release-channel=pr-${{ github.event.number }}"
 
       - name: Comment on PR
-        uses: actions/github-script@v3
+        # v3
+        uses: actions/github-script@ffc2c79a5b2490bd33e0a41c1de74b877714d736
         with:
           github-token: ${{secrets.GITHUB_TOKEN}}
           script: |
